@@ -1,24 +1,25 @@
 const jwt = require('jsonwebtoken');
 
-module.exports = function (req, res, next) {
-  // 1. Obtener el token de la cabecera (header)
+function auth(req, res, next) {
   const token = req.header('x-auth-token');
 
-  // 2. Si no hay token, bloquear el acceso
+  // Check for token
   if (!token) {
-    return res.status(401).json({ msg: 'No hay token, permiso no válido' });
+    return res.status(401).json({ msg: 'No token, authorization denied' });
   }
 
-  // 3. Si hay token, verificarlo
   try {
-    // jwt.verify descifra el token usando nuestro secreto
+    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Guardamos el payload del token (que contiene el id del usuario) en el objeto de la petición
-    req.user = decoded.user;
-    next(); // El token es válido, dejamos pasar la petición
-  } catch (err) {
-    // Si el token no es válido (ej. está expirado o fue alterado)
-    res.status(401).json({ msg: 'Token no es válido' });
+    // ANTES: req.user = decoded.user;
+    // CORREGIDO: Asigna todo el payload decodificado a req.user
+    req.user = decoded;
+
+    next();
+  } catch (e) {
+    res.status(400).json({ msg: 'Token is not valid' });
   }
-};
+}
+
+module.exports = auth;

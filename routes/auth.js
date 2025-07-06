@@ -7,7 +7,6 @@ const User = require('../models/User');
 
 // @route   GET api/auth
 // @desc    Get logged in user
-// @access  Private
 router.get('/', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -20,33 +19,26 @@ router.get('/', auth, async (req, res) => {
 
 // @route   POST api/auth
 // @desc    Auth user & get token
-// @access  Public
 router.post('/', async (req, res) => {
   try {
     const { email, password } = req.body;
-
     let user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ msg: 'Invalid Credentials' });
     }
-
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ msg: 'Invalid Credentials' });
     }
-
     const payload = {
       user: {
         id: user.id,
       },
     };
-
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
-      {
-        expiresIn: '5h',
-      },
+      { expiresIn: '5h' },
       (err, token) => {
         if (err) throw err;
         res.json({ token });
