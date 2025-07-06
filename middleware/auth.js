@@ -3,22 +3,24 @@ const jwt = require('jsonwebtoken');
 function auth(req, res, next) {
   const token = req.header('x-auth-token');
 
-  // Check for token
   if (!token) {
     return res.status(401).json({ msg: 'No token, authorization denied' });
   }
 
   try {
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // ANTES: req.user = decoded.user;
-    // CORREGIDO: Asigna todo el payload decodificado a req.user
-    req.user = decoded;
-
+    req.user = decoded.user;
     next();
-  } catch (e) {
-    res.status(400).json({ msg: 'Token is not valid' });
+  } catch (err) {
+    // --- ESTE BLOQUE NOS DIRÁ LA VERDAD ---
+    console.log('------------------------------------');
+    console.log('--- ERROR DE VERIFICACIÓN DE TOKEN ---');
+    console.log('Token Recibido:', token);
+    console.log('Secreto Usado:', process.env.JWT_SECRET);
+    console.log('Error Específico de JWT:', err.name, '-', err.message);
+    console.log('------------------------------------');
+    
+    res.status(401).json({ msg: 'Token is not valid' });
   }
 }
 

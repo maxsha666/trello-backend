@@ -22,7 +22,7 @@ router.post('/', async (req, res) => {
 
     await user.save();
 
-    // Create token after saving the user
+    // Crear token inmediatamente después de guardar el usuario
     const payload = {
       user: {
         id: user.id,
@@ -35,7 +35,7 @@ router.post('/', async (req, res) => {
       { expiresIn: '5h' },
       (err, token) => {
         if (err) throw err;
-        res.status(201).json({ token });
+        res.status(201).json({ token }); // Devolvemos el token
       }
     );
   } catch (err) {
