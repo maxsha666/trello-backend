@@ -1,62 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
-const Card = require('../models/Card');
-const List = require('../models/List');
 
-// @route   POST api/cards
-// @desc    Create a new card
-// @access  Private
-router.post('/', auth, async (req, res) => {
-  try {
-    const { title, listId } = req.body;
+const {
+  createCard,
+  getCardsByBoard,
+  updateCardPosition,
+  deleteCard,
+} = require('../controllers/cardsController');
 
-    // We need to find the parent list to get the board and user id
-    const parentList = await List.findById(listId);
-    if (!parentList) {
-      return res.status(404).json({ msg: 'List not found' });
-    }
+// Conectamos cada función del controlador a una ruta específica y un método HTTP
 
-    const newCard = new Card({
-      title,
-      list: listId,
-      board: parentList.board, // Get board from parent list
-      user: req.user.id
-    });
+// Ruta para crear una nueva tarjeta
+router.post('/', createCard);
 
-    const card = await newCard.save();
-    res.json(card);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
-});
+// Ruta para obtener todas las tarjetas de un tablero específico
+router.get('/board/:boardId', getCardsByBoard);
 
-// @route   PUT api/cards/:cardId
-// @desc    Update a card (e.g., move to another list)
-// @access  Private
-router.put('/:cardId', auth, async (req, res) => {
-  try {
-    const { listId } = req.body;
+// Ruta para actualizar las posiciones de las tarjetas (Drag & Drop)
+// Usamos PUT porque estamos actualizando un recurso existente
+router.put('/move', updateCardPosition);
 
-    let card = await Card.findById(req.params.cardId);
-
-    if (!card) return res.status(404).json({ msg: 'Card not found' });
-
-    // Make sure user owns the card
-    if (card.user.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'Not authorized' });
-    }
-
-    // Update the list
-    card.list = listId;
-    await card.save();
-
-    res.json(card);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
-});
+// Ruta para eliminar una tarjeta por su ID
+router.delete('/:cardId', deleteCard);
 
 module.exports = router;

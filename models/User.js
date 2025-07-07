@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+// No necesitamos bcryptjs aquí porque el controlador se encargará de la encriptación
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -21,13 +21,6 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
-UserSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
+// La función de auto-encriptación ha sido eliminada.
 
 module.exports = mongoose.model('User', UserSchema);

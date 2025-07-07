@@ -1,21 +1,24 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 
-const ListSchema = new Schema({
-  name: {
+const ListSchema = new mongoose.Schema({
+  title: {
     type: String,
-    required: true
+    required: [true, 'Please add a title'],
+    trim: true,
   },
-  // Link al tablero al que pertenece esta lista
   board: {
-    type: Schema.Types.ObjectId,
-    ref: 'Board'
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Board',
+    required: true,
   },
-  // Link al usuario dueño del tablero (para permisos)
-  user: {
-    type: Schema.Types.ObjectId,
-    ref: 'User'
-  }
+  position: {
+    type: Number,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model('List', ListSchema);

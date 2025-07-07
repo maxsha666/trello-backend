@@ -1,20 +1,26 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 
-const BoardSchema = new Schema({
-  // Aquí creamos la relación con el usuario
-  user: {
-    type: Schema.Types.ObjectId, // Almacenará el ID de un usuario
-    ref: 'User'                  // Hace referencia a nuestro modelo 'User'
-  },
-  name: {
+const BoardSchema = new mongoose.Schema({
+  title: {
     type: String,
-    required: true
+    required: [true, 'Please add a title'],
+    trim: true,
   },
-  date: {
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  lists: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'List',
+    },
+  ],
+  createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model('Board', BoardSchema);
